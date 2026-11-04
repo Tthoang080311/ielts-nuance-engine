@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #F4F6F4;
+  --bg-surface: #FFFFFF;
+  --text-primary: #1B2E1B;
+  --color-matcha: #81C784;
+  --color-matcha-light: #A5D6A7;
+  --border-light: #DCE5DC;
+}
+
+* {
+  box-sizing: border-box;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
+  color: inherit;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible {
+  outline: 2px solid var(--color-matcha);
+  outline-offset: -1px;
+}
+
+/* Flat 2D Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4F6F4;
+  border-left: 1px solid #DCE5DC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A5D6A7;
+  border: 1px solid #81C784;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #81C784;
+}
