@@ -120,7 +120,7 @@ function runLocalSpeakingNaturalizer(spokenText: string): ISpeakingNaturalizerIt
   ];
 
   for (const rule of rules) {
-    const matches = spokenText.matchAll(rule.regex);
+    const matches = Array.from(spokenText.matchAll(rule.regex));
     for (const m of matches) {
       const snippet = m[0].trim();
       const startIdx = m.index ?? spokenText.indexOf(snippet);

@@ -20,9 +20,7 @@ import {
 
 export function sanitizeSupabaseBaseUrl(rawUrl: string): string {
   const trimmed = rawUrl.trim();
-  if (!trimmed) {
-    return '';
-  }
+  if (!trimmed) return '';
   return trimmed
     .replace(/\/rest\/v1\/?$/i, '')
     .replace(/\/realtime\/v1\/?$/i, '')
@@ -31,9 +29,7 @@ export function sanitizeSupabaseBaseUrl(rawUrl: string): string {
 }
 
 export const DEFAULT_BOOTSTRAP_CREDENTIALS: IUserCredentials = {
-  supabaseUrl: sanitizeSupabaseBaseUrl(
-    'https://igetygmsrksbhfhismat.supabase.co/rest/v1/'
-  ),
+  supabaseUrl: sanitizeSupabaseBaseUrl('https://igetygmsrksbhfhismat.supabase.co/rest/v1/'),
   supabaseKey:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnZXR5Z21zcmtzYmhmaGlzbWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyODg5MTAsImV4cCI6MjEwNzg2NDkxMH0.KsK-fHAZrArAFzYgqXr96Ni9mClWxGJPGd9E88yCXD4',
   geminiKey: 'AQ.Ab8RN6ID7F1p5oLZYSPCurA87RtwxuH63kU8Br32tbZPOE3HQ',
@@ -44,17 +40,15 @@ export function generateDeterministicUUID(): UUID {
     return crypto.randomUUID();
   }
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
-    const randomNibble = (Math.random() * 16) | 0;
-    const value = char === 'x' ? randomNibble : (randomNibble & 0x3) | 0x8;
-    return value.toString(16);
+    const r = (Math.random() * 16) | 0;
+    const v = char === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
   });
 }
 
 const safeLocalStorage: StateStorage = {
   getItem: (name: string): string | null => {
-    if (typeof window === 'undefined') {
-      return null;
-    }
+    if (typeof window === 'undefined') return null;
     try {
       return window.localStorage.getItem(name);
     } catch {
@@ -62,19 +56,15 @@ const safeLocalStorage: StateStorage = {
     }
   },
   setItem: (name: string, value: string): void => {
-    if (typeof window === 'undefined') {
-      return;
-    }
+    if (typeof window === 'undefined') return;
     try {
       window.localStorage.setItem(name, value);
     } catch {
-      // Ignore storage quota errors
+      // Ignore quota errors
     }
   },
   removeItem: (name: string): void => {
-    if (typeof window === 'undefined') {
-      return;
-    }
+    if (typeof window === 'undefined') return;
     try {
       window.localStorage.removeItem(name);
     } catch {
@@ -94,7 +84,7 @@ const INITIAL_CLUSTERS: ISynonymCluster[] = [
     nuance_matrix: {
       formality: 'Academic Band 8.5+ ưu tiên pivotal (vai trò bước ngoặt) và paramount (tối thượng).',
       collocation: 'of paramount importance / play a pivotal role in',
-      register_warning: 'Không dùng paramount trực tiếp trước danh từ đếm được số ít mang nghĩa thông thường.',
+      register_warning: 'Không dùng paramount trực tiếp trước danh từ đếm được số ít thông thường.',
     },
     sync_status: 'synced',
     created_at: '2026-01-01T00:00:00.000Z',
@@ -108,7 +98,7 @@ const INITIAL_CLUSTERS: ISynonymCluster[] = [
     tier_c1: 'predicament',
     tier_c2: 'conundrum',
     nuance_matrix: {
-      formality: 'Conundrum chỉ bài toán nan giải không có lời giải dễ dàng; predicament chỉ tình thế tiến thoái lưỡng nan.',
+      formality: 'Conundrum chỉ bài toán nan giải; predicament chỉ tình thế tiến thoái lưỡng nan.',
       collocation: 'pose a formidable conundrum / alleviate a fiscal predicament',
       register_warning: 'Tránh dùng conundrum cho các sự cố kỹ thuật nhỏ nhặt hằng ngày.',
     },
@@ -143,7 +133,7 @@ const INITIAL_VOCAB: IVocabWord[] = [
     academic_alternative: 'pervasive / omnipresent',
     spoken_idiom: 'popping up everywhere',
     cluster_id: '11111111-1111-4111-8111-111111111101',
-    tsvector_search: "'everywher':8B 'omnipres':5B 'pervas':4B 'pop':6B 'ubiquit':1A",
+    tsvector_search: "'ubiquit':1A",
     sync_status: 'synced',
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-01-01T00:00:00.000Z',
@@ -156,7 +146,7 @@ const INITIAL_VOCAB: IVocabWord[] = [
     academic_alternative: 'aggravate / compound',
     spoken_idiom: 'make things way worse',
     cluster_id: '11111111-1111-4111-8111-111111111102',
-    tsvector_search: "'aggrav':2B 'compound':3B 'exacerb':1A 'make':4B 'wors':7B",
+    tsvector_search: "'exacerb':1A",
     sync_status: 'synced',
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-01-01T00:00:00.000Z',
@@ -169,7 +159,7 @@ const INITIAL_VOCAB: IVocabWord[] = [
     academic_alternative: 'alleviate / attenuate',
     spoken_idiom: 'take the edge off',
     cluster_id: '11111111-1111-4111-8111-111111111103',
-    tsvector_search: "'allevi':2B 'attenu':3B 'edg':6B 'mitig':1A",
+    tsvector_search: "'mitig':1A",
     sync_status: 'synced',
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-01-01T00:00:00.000Z',
@@ -203,9 +193,7 @@ export const useAppStore = create<IAppState>()(
     (set, get) => ({
       _hasHydrated: false,
       activeTab: 'writing',
-      credentials: {
-        ...DEFAULT_BOOTSTRAP_CREDENTIALS,
-      },
+      credentials: { ...DEFAULT_BOOTSTRAP_CREDENTIALS },
       vocabVault: INITIAL_VOCAB,
       synonymClusters: INITIAL_CLUSTERS,
       exercisesVault: INITIAL_EXERCISES,
@@ -216,61 +204,33 @@ export const useAppStore = create<IAppState>()(
       isSyncing: false,
       lastSyncedAt: null,
 
-      setHasHydrated: (hydrated: boolean): void => {
-        set({ _hasHydrated: hydrated });
-      },
-
-      setActiveTab: (tab: WorkspaceTab): void => {
-        set({ activeTab: tab });
-      },
-
-      setCredentials: (creds: IUserCredentials): void => {
+      setHasHydrated: (hydrated: boolean): void => set({ _hasHydrated: hydrated }),
+      setActiveTab: (tab: WorkspaceTab): void => set({ activeTab: tab }),
+      setCredentials: (creds: IUserCredentials): void =>
         set({
           credentials: {
             supabaseUrl: sanitizeSupabaseBaseUrl(creds.supabaseUrl),
             supabaseKey: creds.supabaseKey.trim(),
             geminiKey: creds.geminiKey.trim(),
           },
-        });
-      },
-
-      resetToDefaultCredentials: (): void => {
-        set({
-          credentials: {
-            ...DEFAULT_BOOTSTRAP_CREDENTIALS,
-          },
-        });
-      },
-
-      setOnlineStatus: (online: boolean): void => {
-        set({ isOnline: online });
-      },
-
-      setSyncingStatus: (syncing: boolean): void => {
-        set({ isSyncing: syncing });
-      },
-
-      setLastSyncedAt: (timestamp: string): void => {
-        set({ lastSyncedAt: timestamp });
-      },
+        }),
+      resetToDefaultCredentials: (): void =>
+        set({ credentials: { ...DEFAULT_BOOTSTRAP_CREDENTIALS } }),
+      setOnlineStatus: (online: boolean): void => set({ isOnline: online }),
+      setSyncingStatus: (syncing: boolean): void => set({ isSyncing: syncing }),
+      setLastSyncedAt: (timestamp: string): void => set({ lastSyncedAt: timestamp }),
 
       upsertVocabWord: (word: IVocabWord): void => {
         const nowIso = new Date().toISOString();
-        const optimisticRecord: IVocabWord = {
-          ...word,
-          sync_status: 'pending',
-          updated_at: nowIso,
-        };
-
+        const optimisticRecord: IVocabWord = { ...word, sync_status: 'pending', updated_at: nowIso };
         set((state) => {
           const exists = state.vocabVault.some((item) => item.id === word.id);
-          const nextVault = exists
-            ? state.vocabVault.map((item) => (item.id === word.id ? optimisticRecord : item))
-            : [optimisticRecord, ...state.vocabVault];
-
-          return { vocabVault: nextVault };
+          return {
+            vocabVault: exists
+              ? state.vocabVault.map((item) => (item.id === word.id ? optimisticRecord : item))
+              : [optimisticRecord, ...state.vocabVault],
+          };
         });
-
         get().enqueueSyncOperation('vocab_vault', 'UPSERT', optimisticRecord.id, optimisticRecord);
       },
 
@@ -279,174 +239,266 @@ export const useAppStore = create<IAppState>()(
         field: 'word' | 'nuance' | 'academic_alternative' | 'spoken_idiom' | 'cefr',
         value: string
       ): void => {
-        const state = get();
-        const target = state.vocabVault.find((w) => w.id === id);
-        if (!target) {
-          return;
-        }
-
-        if (target[field] === value) {
-          return;
-        }
-
+        const target = get().vocabVault.find((w) => w.id === id);
+        if (!target || target[field] === value) return;
         const nowIso = new Date().toISOString();
         const updatedRecord: IVocabWord = {
           ...target,
           [field]:
             field === 'cefr'
-              ? ((['B1', 'B2', 'C1', 'C2'].includes(value.trim())
-                  ? value.trim()
-                  : target.cefr) as CEFRLevel)
+              ? ((['B1', 'B2', 'C1', 'C2'].includes(value.trim()) ? value.trim() : target.cefr) as CEFRLevel)
               : value,
           sync_status: 'pending',
           updated_at: nowIso,
         };
-
         set((current) => ({
-          vocabVault: current.vocabVault.map((item) =>
-            item.id === id ? updatedRecord : item
-          ),
+          vocabVault: current.vocabVault.map((item) => (item.id === id ? updatedRecord : item)),
         }));
-
         get().enqueueSyncOperation('vocab_vault', 'UPSERT', updatedRecord.id, updatedRecord);
       },
 
       bulkSeedVocabIfNeeded: (count: number): void => {
         const currentVault = get().vocabVault;
-        if (currentVault.length >= count) {
-          return;
-        }
-
+        if (currentVault.length >= count) return;
         const cefrPool: CEFRLevel[] = ['B1', 'B2', 'C1', 'C2'];
-        const academicStems: Array<{
-          word: string;
-          alt: string;
-          idiom: string;
-          nuance: string;
-        }> = [
-          {
-            word: 'proliferation',
-            alt: 'rapid expansion / surge',
-            idiom: 'mushrooming everywhere',
-            nuance: 'Sự gia tăng nhanh chóng về số lượng (công nghệ, vũ khí, thông tin).',
-          },
-          {
-            word: 'ameliorate',
-            alt: 'improve / alleviate',
-            idiom: 'make things better',
-            nuance: 'Cải thiện một tình trạng tồi tệ hoặc khó khăn trở nên dễ chịu hơn.',
-          },
-          {
-            word: 'juxtaposition',
-            alt: 'side-by-side contrast',
-            idiom: 'putting side by side',
-            nuance: 'Đặt hai yếu tố đối lập cạnh nhau để làm nổi bật sự tương phản.',
-          },
-          {
-            word: 'dichotomy',
-            alt: 'sharp division / contrast',
-            idiom: 'night and day difference',
-            nuance: 'Sự phân chia tách biệt hoàn toàn giữa hai mặt đối lập.',
-          },
-          {
-            word: 'corroborate',
-            alt: 'substantiate / verify',
-            idiom: 'back up a claim',
-            nuance: 'Củng cố, xác nhận một giả thuyết bằng bằng chứng thực nghiệm.',
-          },
-          {
-            word: 'ramification',
-            alt: 'consequence / implication',
-            idiom: 'knock-on effect',
-            nuance: 'Hệ lụy phức tạp và lâu dài phát sinh từ một quyết định chính sách.',
-          },
-        ];
-
+        const stems = ['proliferation', 'ameliorate', 'juxtaposition', 'dichotomy', 'corroborate', 'ramification'];
         const generated: IVocabWord[] = [...currentVault];
         const baseTimestamp = new Date().toISOString();
-
         for (let i = currentVault.length; i < count; i++) {
-          const item = academicStems[i % academicStems.length];
-          const level = cefrPool[i % cefrPool.length];
-          const paddedIndex = String(i + 1).padStart(4, '0');
+          const stem = stems[i % stems.length];
+          const padded = String(i + 1).padStart(4, '0');
           generated.push({
             id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
-            word: `${item.word} #${paddedIndex}`,
-            cefr: level,
-            nuance: item.nuance,
-            academic_alternative: item.alt,
-            spoken_idiom: item.idiom,
+            word: `${stem} #${padded}`,
+            cefr: cefrPool[i % cefrPool.length],
+            nuance: `Sắc thái học thuật chuyên sâu #${padded} cho IELTS Writing & Speaking.`,
+            academic_alternative: `formal_${stem}`,
+            spoken_idiom: `natural_${stem}`,
             cluster_id: INITIAL_CLUSTERS[i % INITIAL_CLUSTERS.length].id,
-            tsvector_search: `'${item.word}':1A`,
+            tsvector_search: `'${stem}':1A`,
             sync_status: 'synced',
             created_at: baseTimestamp,
             updated_at: baseTimestamp,
           });
         }
-
         set({ vocabVault: generated });
       },
 
       upsertSynonymCluster: (cluster: ISynonymCluster): void => {
         const nowIso = new Date().toISOString();
-        const optimisticCluster: ISynonymCluster = {
-          ...cluster,
-          sync_status: 'pending',
-          updated_at: nowIso,
-        };
-
+        const optimisticCluster: ISynonymCluster = { ...cluster, sync_status: 'pending', updated_at: nowIso };
         set((state) => {
           const exists = state.synonymClusters.some((c) => c.id === cluster.id);
-          const nextClusters = exists
-            ? state.synonymClusters.map((c) => (c.id === cluster.id ? optimisticCluster : c))
-            : [optimisticCluster, ...state.synonymClusters];
-
-          return { synonymClusters: nextClusters };
+          return {
+            synonymClusters: exists
+              ? state.synonymClusters.map((c) => (c.id === cluster.id ? optimisticCluster : c))
+              : [optimisticCluster, ...state.synonymClusters],
+          };
         });
-
-        get().enqueueSyncOperation(
-          'synonym_clusters',
-          'UPSERT',
-          optimisticCluster.id,
-          optimisticCluster
-        );
+        get().enqueueSyncOperation('synonym_clusters', 'UPSERT', optimisticCluster.id, optimisticCluster);
       },
 
       upsertExerciseDraft: (exercise: IExerciseDraft): void => {
         const nowIso = new Date().toISOString();
-        const optimisticExercise: IExerciseDraft = {
-          ...exercise,
-          sync_status: 'pending',
-          updated_at: nowIso,
-        };
-
+        const optimisticExercise: IExerciseDraft = { ...exercise, sync_status: 'pending', updated_at: nowIso };
         set((state) => {
           const exists = state.exercisesVault.some((ex) => ex.id === exercise.id);
-          const nextExercises = exists
-            ? state.exercisesVault.map((ex) =>
-                ex.id === exercise.id ? optimisticExercise : ex
-              )
-            : [optimisticExercise, ...state.exercisesVault];
-
-          return { exercisesVault: nextExercises };
+          return {
+            exercisesVault: exists
+              ? state.exercisesVault.map((ex) => (ex.id === exercise.id ? optimisticExercise : ex))
+              : [optimisticExercise, ...state.exercisesVault],
+          };
         });
-
-        get().enqueueSyncOperation(
-          'exercises_vault',
-          'UPSERT',
-          optimisticExercise.id,
-          optimisticExercise
-        );
+        get().enqueueSyncOperation('exercises_vault', 'UPSERT', optimisticExercise.id, optimisticExercise);
       },
 
-      recordSRSReviewOptimistic: (
-        updatedExercise: IExerciseDraft,
-        logEntry: ISRSLog
+      recordSRSReviewOptimistic: (updatedExercise: IExerciseDraft, logEntry: ISRSLog): void => {
+        const nowIso = new Date().toISOString();
+        const nextExercise: IExerciseDraft = { ...updatedExercise, sync_status: 'pending', updated_at: nowIso };
+        const nextLog: ISRSLog = { ...logEntry, sync_status: 'pending', updated_at: nowIso };
+        set((state) => ({
+          exercisesVault: state.exercisesVault.map((ex) => (ex.id === nextExercise.id ? nextExercise : ex)),
+          srsLogs: [nextLog, ...state.srsLogs],
+        }));
+        get().enqueueSyncOperation('exercises_vault', 'UPSERT', nextExercise.id, nextExercise);
+        get().enqueueSyncOperation('srs_logs', 'UPSERT', nextLog.id, nextLog);
+      },
+
+      reconcileRemoteExercise: (remoteExercise: IExerciseDraft): void => {
+        set((state) => {
+          const existing = state.exercisesVault.find((ex) => ex.id === remoteExercise.id);
+          if (!existing) {
+            return { exercisesVault: [{ ...remoteExercise, sync_status: 'synced' }, ...state.exercisesVault] };
+          }
+          const remoteTime = new Date(remoteExercise.updated_at).getTime();
+          const localTime = new Date(existing.updated_at).getTime();
+          if (remoteTime >= localTime) {
+            return {
+              exercisesVault: state.exercisesVault.map((ex) =>
+                ex.id === remoteExercise.id ? { ...remoteExercise, sync_status: 'synced' } : ex
+              ),
+            };
+          }
+          return state;
+        });
+      },
+
+      reconcileRemoteVocab: (remoteVocab: IVocabWord): void => {
+        set((state) => {
+          const existing = state.vocabVault.find((w) => w.id === remoteVocab.id);
+          if (!existing) {
+            return { vocabVault: [{ ...remoteVocab, sync_status: 'synced' }, ...state.vocabVault] };
+          }
+          const remoteTime = new Date(remoteVocab.updated_at).getTime();
+          const localTime = new Date(existing.updated_at).getTime();
+          if (remoteTime >= localTime) {
+            return {
+              vocabVault: state.vocabVault.map((w) =>
+                w.id === remoteVocab.id ? { ...remoteVocab, sync_status: 'synced' } : w
+              ),
+            };
+          }
+          return state;
+        });
+      },
+
+      enqueueSyncOperation: (
+        table: SyncTableName,
+        operation: SyncOperationType,
+        recordId: UUID,
+        payload: SyncPayloadRecord
       ): void => {
         const nowIso = new Date().toISOString();
-        const nextExercise: IExerciseDraft = {
-          ...updatedExercise,
-          sync_status: 'pending',
-          updated_at: nowIso,
+        set((state) => {
+          const existingIndex = state.syncQueue.findIndex(
+            (item) => item.table === table && item.recordId === recordId
+          );
+          if (existingIndex > -1) {
+            const updatedQueue = [...state.syncQueue];
+            updatedQueue[existingIndex] = {
+              ...updatedQueue[existingIndex],
+              operation,
+              payload,
+              errorMessage: null,
+              lastAttemptAt: null,
+            };
+            return { syncQueue: updatedQueue };
+          }
+          const newItem: ISyncQueueItem = {
+            id: generateDeterministicUUID(),
+            table,
+            operation,
+            recordId,
+            payload,
+            retryCount: 0,
+            lastAttemptAt: null,
+            errorMessage: null,
+            createdAt: nowIso,
+          };
+          return { syncQueue: [...state.syncQueue, newItem] };
+        });
+      },
+
+      dequeueSyncOperation: (queueItemId: UUID): void =>
+        set((state) => ({ syncQueue: state.syncQueue.filter((item) => item.id !== queueItemId) })),
+
+      markQueueItemFailed: (queueItemId: UUID, errorMessage: string): void => {
+        const nowIso = new Date().toISOString();
+        set((state) => ({
+          syncQueue: state.syncQueue.map((item) =>
+            item.id === queueItemId
+              ? { ...item, retryCount: item.retryCount + 1, lastAttemptAt: nowIso, errorMessage }
+              : item
+          ),
+        }));
+      },
+
+      markEntitySynced: (table: SyncTableName, recordId: UUID, syncedAt: string): void => {
+        set((state) => {
+          if (table === 'vocab_vault') {
+            return {
+              lastSyncedAt: syncedAt,
+              vocabVault: state.vocabVault.map((w) => (w.id === recordId ? { ...w, sync_status: 'synced' } : w)),
+            };
+          }
+          if (table === 'synonym_clusters') {
+            return {
+              lastSyncedAt: syncedAt,
+              synonymClusters: state.synonymClusters.map((c) =>
+                c.id === recordId ? { ...c, sync_status: 'synced' } : c
+              ),
+            };
+          }
+          if (table === 'exercises_vault') {
+            return {
+              lastSyncedAt: syncedAt,
+              exercisesVault: state.exercisesVault.map((ex) =>
+                ex.id === recordId ? { ...ex, sync_status: 'synced' } : ex
+              ),
+            };
+          }
+          if (table === 'srs_logs') {
+            return {
+              lastSyncedAt: syncedAt,
+              srsLogs: state.srsLogs.map((log) => (log.id === recordId ? { ...log, sync_status: 'synced' } : log)),
+            };
+          }
+          return { lastSyncedAt: syncedAt };
+        });
+      },
+
+      addToast: (severity: ToastSeverity, title: string, message: string, durationMs: number = 5000): void => {
+        const toast: IToastNotification = {
+          id: generateDeterministicUUID(),
+          severity,
+          title,
+          message,
+          createdAt: Date.now(),
+          durationMs,
         };
-        const next
+        set((state) => ({ toasts: [...state.toasts.slice(-4), toast] }));
+      },
+
+      dismissToast: (id: UUID): void =>
+        set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
+
+      clearAllToasts: (): void => set({ toasts: [] }),
+    }),
+    {
+      name: 'ielts-nuance-storage',
+      storage: createJSONStorage(() => safeLocalStorage),
+      partialize: (state) => ({
+        activeTab: state.activeTab,
+        credentials: state.credentials,
+        vocabVault: state.vocabVault,
+        synonymClusters: state.synonymClusters,
+        exercisesVault: state.exercisesVault,
+        srsLogs: state.srsLogs,
+        syncQueue: state.syncQueue,
+        lastSyncedAt: state.lastSyncedAt,
+      }),
+      merge: (persistedState, currentState) => {
+        const typedPersisted = persistedState as Partial<IAppState> | undefined;
+        if (!typedPersisted) return currentState;
+        const savedGeminiKey = typedPersisted.credentials?.geminiKey?.trim() || '';
+        const isLeakedOldKey = savedGeminiKey.startsWith('AIzaSyD5B79');
+        return {
+          ...currentState,
+          ...typedPersisted,
+          credentials: {
+            supabaseUrl: sanitizeSupabaseBaseUrl(
+              typedPersisted.credentials?.supabaseUrl || DEFAULT_BOOTSTRAP_CREDENTIALS.supabaseUrl
+            ),
+            supabaseKey:
+              typedPersisted.credentials?.supabaseKey?.trim() || DEFAULT_BOOTSTRAP_CREDENTIALS.supabaseKey,
+            geminiKey:
+              !savedGeminiKey || isLeakedOldKey ? DEFAULT_BOOTSTRAP_CREDENTIALS.geminiKey : savedGeminiKey,
+          },
+        };
+      },
+      onRehydrateStorage: () => (state) => {
+        if (state) state.setHasHydrated(true);
+      },
+    }
+  )
+);

@@ -145,7 +145,7 @@ function runLocalAcademicAnalysis(essayText: string): IAcademicCritiqueItem[] {
   ];
 
   for (const rule of rules) {
-    const matches = essayText.matchAll(rule.regex);
+    const matches = Array.from(essayText.matchAll(rule.regex));
     for (const m of matches) {
       const snippet = m[0].trim();
       const startIdx = m.index ?? essayText.indexOf(snippet);
