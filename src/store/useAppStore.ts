@@ -18,11 +18,6 @@ import {
   WorkspaceTab,
 } from '@/types/database.types';
 
-/**
- * Hàm chuẩn hóa Supabase URL:
- * Tự động cắt bỏ `/rest/v1/`, `/realtime/v1/`, `/auth/v1/` hoặc dấu `/` ở cuối
- * để đảm bảo `@supabase/supabase-js` không bị lỗi 404 PostgREST hoặc đứt kết nối WebSocket.
- */
 export function sanitizeSupabaseBaseUrl(rawUrl: string): string {
   const trimmed = rawUrl.trim();
   if (!trimmed) {
@@ -35,22 +30,15 @@ export function sanitizeSupabaseBaseUrl(rawUrl: string): string {
     .replace(/\/+$/, '');
 }
 
-/**
- * Bộ 3 Credentials của bạn được nạp sẵn để hệ thống hoạt động tức thì ngay khi khởi chạy
- * mà vẫn cho phép thay đổi linh hoạt trên thanh CloudSyncBar (BYOK).
- */
 export const DEFAULT_BOOTSTRAP_CREDENTIALS: IUserCredentials = {
   supabaseUrl: sanitizeSupabaseBaseUrl(
     'https://igetygmsrksbhfhismat.supabase.co/rest/v1/'
   ),
   supabaseKey:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnZXR5Z21zcmtzYmhmaGlzbWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyODg5MTAsImV4cCI6MjEwNzg2NDkxMH0.KsK-fHAZrArAFzYgqXr96Ni9mClWxGJPGd9E88yCXD4',
-  geminiKey: 'AIzaSyD5B79uSbvAh24J0ZUafGcgfgFy9ixX7cI',
+  geminiKey: 'AQ.Ab8RN6ID7F1p5oLZYSPCurA87RtwxuH63kU8Br32tbZPOE3HQ',
 };
 
-/**
- * Bộ tạo UUID v4 chuẩn RFC4122 hoạt động mọi môi trường
- */
 export function generateDeterministicUUID(): UUID {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -62,9 +50,6 @@ export function generateDeterministicUUID(): UUID {
   });
 }
 
-/**
- * Safe Storage Adapter tránh crash khi chạy SSR trên Next.js 14 hoặc khi bộ nhớ đầy
- */
 const safeLocalStorage: StateStorage = {
   getItem: (name: string): string | null => {
     if (typeof window === 'undefined') {
@@ -83,7 +68,7 @@ const safeLocalStorage: StateStorage = {
     try {
       window.localStorage.setItem(name, value);
     } catch {
-      // Bỏ qua nếu trình duyệt chặn QuotaExceededError ở chế độ ẩn danh
+      // Ignore storage quota errors
     }
   },
   removeItem: (name: string): void => {
@@ -93,7 +78,7 @@ const safeLocalStorage: StateStorage = {
     try {
       window.localStorage.removeItem(name);
     } catch {
-      // Không làm sập tiến trình
+      // Ignore storage errors
     }
   },
 };
@@ -300,8 +285,7 @@ export const useAppStore = create<IAppState>()(
           return;
         }
 
-        const trimmedValue = value.trim();
-        if (target[field] === trimmedValue) {
+        if (target[field] === value) {
           return;
         }
 
@@ -310,10 +294,10 @@ export const useAppStore = create<IAppState>()(
           ...target,
           [field]:
             field === 'cefr'
-              ? ((['B1', 'B2', 'C1', 'C2'].includes(trimmedValue)
-                  ? trimmedValue
+              ? ((['B1', 'B2', 'C1', 'C2'].includes(value.trim())
+                  ? value.trim()
                   : target.cefr) as CEFRLevel)
-              : trimmedValue,
+              : value,
           sync_status: 'pending',
           updated_at: nowIso,
         };
@@ -334,36 +318,66 @@ export const useAppStore = create<IAppState>()(
         }
 
         const cefrPool: CEFRLevel[] = ['B1', 'B2', 'C1', 'C2'];
-        const academicStems: string[] = [
-          'proliferation',
-          'ameliorate',
-          'juxtaposition',
-          'dichotomy',
-          'ephemeral',
-          'corroborate',
-          'paradigm',
-          'hegemony',
-          'pragmatic',
-          'unprecedented',
-          'ramification',
-          'discrepancy',
+        const academicStems: Array<{
+          word: string;
+          alt: string;
+          idiom: string;
+          nuance: string;
+        }> = [
+          {
+            word: 'proliferation',
+            alt: 'rapid expansion / surge',
+            idiom: 'mushrooming everywhere',
+            nuance: 'Sự gia tăng nhanh chóng về số lượng (công nghệ, vũ khí, thông tin).',
+          },
+          {
+            word: 'ameliorate',
+            alt: 'improve / alleviate',
+            idiom: 'make things better',
+            nuance: 'Cải thiện một tình trạng tồi tệ hoặc khó khăn trở nên dễ chịu hơn.',
+          },
+          {
+            word: 'juxtaposition',
+            alt: 'side-by-side contrast',
+            idiom: 'putting side by side',
+            nuance: 'Đặt hai yếu tố đối lập cạnh nhau để làm nổi bật sự tương phản.',
+          },
+          {
+            word: 'dichotomy',
+            alt: 'sharp division / contrast',
+            idiom: 'night and day difference',
+            nuance: 'Sự phân chia tách biệt hoàn toàn giữa hai mặt đối lập.',
+          },
+          {
+            word: 'corroborate',
+            alt: 'substantiate / verify',
+            idiom: 'back up a claim',
+            nuance: 'Củng cố, xác nhận một giả thuyết bằng bằng chứng thực nghiệm.',
+          },
+          {
+            word: 'ramification',
+            alt: 'consequence / implication',
+            idiom: 'knock-on effect',
+            nuance: 'Hệ lụy phức tạp và lâu dài phát sinh từ một quyết định chính sách.',
+          },
         ];
+
         const generated: IVocabWord[] = [...currentVault];
         const baseTimestamp = new Date().toISOString();
 
         for (let i = currentVault.length; i < count; i++) {
-          const stem = academicStems[i % academicStems.length];
+          const item = academicStems[i % academicStems.length];
           const level = cefrPool[i % cefrPool.length];
-          const paddedIndex = String(i + 1).padStart(5, '0');
+          const paddedIndex = String(i + 1).padStart(4, '0');
           generated.push({
             id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
-            word: `${stem}_${paddedIndex}`,
+            word: `${item.word} #${paddedIndex}`,
             cefr: level,
-            nuance: `Sắc thái học thuật chuyên sâu số #${paddedIndex} dùng cho IELTS Writing Task 2`,
-            academic_alternative: `formal_${stem}_${paddedIndex}`,
-            spoken_idiom: `natural_phrase_${paddedIndex}`,
+            nuance: item.nuance,
+            academic_alternative: item.alt,
+            spoken_idiom: item.idiom,
             cluster_id: INITIAL_CLUSTERS[i % INITIAL_CLUSTERS.length].id,
-            tsvector_search: `'${stem}':1A`,
+            tsvector_search: `'${item.word}':1A`,
             sync_status: 'synced',
             created_at: baseTimestamp,
             updated_at: baseTimestamp,
@@ -435,252 +449,4 @@ export const useAppStore = create<IAppState>()(
           sync_status: 'pending',
           updated_at: nowIso,
         };
-        const nextLog: ISRSLog = {
-          ...logEntry,
-          sync_status: 'pending',
-          updated_at: nowIso,
-        };
-
-        set((state) => ({
-          exercisesVault: state.exercisesVault.map((ex) =>
-            ex.id === nextExercise.id ? nextExercise : ex
-          ),
-          srsLogs: [nextLog, ...state.srsLogs],
-        }));
-
-        get().enqueueSyncOperation('exercises_vault', 'UPSERT', nextExercise.id, nextExercise);
-        get().enqueueSyncOperation('srs_logs', 'UPSERT', nextLog.id, nextLog);
-      },
-
-      reconcileRemoteExercise: (remoteExercise: IExerciseDraft): void => {
-        set((state) => {
-          const existing = state.exercisesVault.find((ex) => ex.id === remoteExercise.id);
-          if (!existing) {
-            return {
-              exercisesVault: [
-                { ...remoteExercise, sync_status: 'synced' },
-                ...state.exercisesVault,
-              ],
-            };
-          }
-
-          // Last-Write-Wins (LWW): Chỉ ghi đè nếu bản ghi từ Server mới hơn bản ghi Local
-          const remoteTime = new Date(remoteExercise.updated_at).getTime();
-          const localTime = new Date(existing.updated_at).getTime();
-
-          if (remoteTime >= localTime) {
-            return {
-              exercisesVault: state.exercisesVault.map((ex) =>
-                ex.id === remoteExercise.id
-                  ? { ...remoteExercise, sync_status: 'synced' }
-                  : ex
-              ),
-            };
-          }
-
-          return state;
-        });
-      },
-
-      reconcileRemoteVocab: (remoteVocab: IVocabWord): void => {
-        set((state) => {
-          const existing = state.vocabVault.find((w) => w.id === remoteVocab.id);
-          if (!existing) {
-            return {
-              vocabVault: [{ ...remoteVocab, sync_status: 'synced' }, ...state.vocabVault],
-            };
-          }
-
-          const remoteTime = new Date(remoteVocab.updated_at).getTime();
-          const localTime = new Date(existing.updated_at).getTime();
-
-          if (remoteTime >= localTime) {
-            return {
-              vocabVault: state.vocabVault.map((w) =>
-                w.id === remoteVocab.id ? { ...remoteVocab, sync_status: 'synced' } : w
-              ),
-            };
-          }
-
-          return state;
-        });
-      },
-
-      enqueueSyncOperation: (
-        table: SyncTableName,
-        operation: SyncOperationType,
-        recordId: UUID,
-        payload: SyncPayloadRecord
-      ): void => {
-        const nowIso = new Date().toISOString();
-
-        set((state) => {
-          const existingIndex = state.syncQueue.findIndex(
-            (item) => item.table === table && item.recordId === recordId
-          );
-
-          if (existingIndex > -1) {
-            const updatedQueue = [...state.syncQueue];
-            updatedQueue[existingIndex] = {
-              ...updatedQueue[existingIndex],
-              operation,
-              payload,
-              errorMessage: null,
-              lastAttemptAt: null,
-            };
-            return { syncQueue: updatedQueue };
-          }
-
-          const newItem: ISyncQueueItem = {
-            id: generateDeterministicUUID(),
-            table,
-            operation,
-            recordId,
-            payload,
-            retryCount: 0,
-            lastAttemptAt: null,
-            errorMessage: null,
-            createdAt: nowIso,
-          };
-
-          return {
-            syncQueue: [...state.syncQueue, newItem],
-          };
-        });
-      },
-
-      dequeueSyncOperation: (queueItemId: UUID): void => {
-        set((state) => ({
-          syncQueue: state.syncQueue.filter((item) => item.id !== queueItemId),
-        }));
-      },
-
-      markQueueItemFailed: (queueItemId: UUID, errorMessage: string): void => {
-        const nowIso = new Date().toISOString();
-        set((state) => ({
-          syncQueue: state.syncQueue.map((item) =>
-            item.id === queueItemId
-              ? {
-                  ...item,
-                  retryCount: item.retryCount + 1,
-                  lastAttemptAt: nowIso,
-                  errorMessage,
-                }
-              : item
-          ),
-        }));
-      },
-
-      markEntitySynced: (table: SyncTableName, recordId: UUID, syncedAt: string): void => {
-        set((state) => {
-          if (table === 'vocab_vault') {
-            return {
-              lastSyncedAt: syncedAt,
-              vocabVault: state.vocabVault.map((w) =>
-                w.id === recordId ? { ...w, sync_status: 'synced' } : w
-              ),
-            };
-          }
-          if (table === 'synonym_clusters') {
-            return {
-              lastSyncedAt: syncedAt,
-              synonymClusters: state.synonymClusters.map((c) =>
-                c.id === recordId ? { ...c, sync_status: 'synced' } : c
-              ),
-            };
-          }
-          if (table === 'exercises_vault') {
-            return {
-              lastSyncedAt: syncedAt,
-              exercisesVault: state.exercisesVault.map((ex) =>
-                ex.id === recordId ? { ...ex, sync_status: 'synced' } : ex
-              ),
-            };
-          }
-          if (table === 'srs_logs') {
-            return {
-              lastSyncedAt: syncedAt,
-              srsLogs: state.srsLogs.map((log) =>
-                log.id === recordId ? { ...log, sync_status: 'synced' } : log
-              ),
-            };
-          }
-          return { lastSyncedAt: syncedAt };
-        });
-      },
-
-      addToast: (
-        severity: ToastSeverity,
-        title: string,
-        message: string,
-        durationMs: number = 5000
-      ): void => {
-        const toast: IToastNotification = {
-          id: generateDeterministicUUID(),
-          severity,
-          title,
-          message,
-          createdAt: Date.now(),
-          durationMs,
-        };
-        set((state) => ({
-          toasts: [...state.toasts.slice(-4), toast],
-        }));
-      },
-
-      dismissToast: (id: UUID): void => {
-        set((state) => ({
-          toasts: state.toasts.filter((t) => t.id !== id),
-        }));
-      },
-
-      clearAllToasts: (): void => {
-        set({ toasts: [] });
-      },
-    }),
-    {
-      name: 'ielts-nuance-storage',
-      storage: createJSONStorage(() => safeLocalStorage),
-      partialize: (state) => ({
-        activeTab: state.activeTab,
-        credentials: state.credentials,
-        vocabVault: state.vocabVault,
-        synonymClusters: state.synonymClusters,
-        exercisesVault: state.exercisesVault,
-        srsLogs: state.srsLogs,
-        syncQueue: state.syncQueue,
-        lastSyncedAt: state.lastSyncedAt,
-      }),
-      merge: (persistedState, currentState) => {
-        const typedPersisted = persistedState as Partial<IAppState> | undefined;
-        if (!typedPersisted) {
-          return currentState;
-        }
-
-        // Chống lỗi Hydration Shadowing: Nếu localStorage cũ có key rỗng, tự bù bằng DEFAULT_BOOTSTRAP_CREDENTIALS
-        const mergedCredentials: IUserCredentials = {
-          supabaseUrl: sanitizeSupabaseBaseUrl(
-            typedPersisted.credentials?.supabaseUrl || DEFAULT_BOOTSTRAP_CREDENTIALS.supabaseUrl
-          ),
-          supabaseKey:
-            typedPersisted.credentials?.supabaseKey?.trim() ||
-            DEFAULT_BOOTSTRAP_CREDENTIALS.supabaseKey,
-          geminiKey:
-            typedPersisted.credentials?.geminiKey?.trim() ||
-            DEFAULT_BOOTSTRAP_CREDENTIALS.geminiKey,
-        };
-
-        return {
-          ...currentState,
-          ...typedPersisted,
-          credentials: mergedCredentials,
-        };
-      },
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setHasHydrated(true);
-        }
-      },
-    }
-  )
-);
+        const next
