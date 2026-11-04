@@ -48,9 +48,10 @@ function isGraderRequestBody(value: unknown): value is IAcademicGraderRequestBod
   );
 }
 
+// Chấp nhận cả khóa bắt đầu bằng "AQ." lẫn "AIza", ưu tiên tuyệt đối khóa từ Client gửi lên
 function resolveValidGeminiKey(clientKey?: string): string {
   const trimmedClient = typeof clientKey === 'string' ? clientKey.trim() : '';
-  if (trimmedClient.startsWith('AIza') && trimmedClient.length >= 30) {
+  if (trimmedClient.length >= 15) {
     return trimmedClient;
   }
 
@@ -60,11 +61,23 @@ function resolveValidGeminiKey(clientKey?: string): string {
     ''
   ).trim();
 
-  if (envKey.startsWith('AIza') && envKey.length >= 30) {
+  if (envKey.length >= 15) {
     return envKey;
   }
 
   return '';
+}
+
+function isFatalAuthOrClientError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+  return (
+    msg.includes('403') ||
+    msg.includes('401') ||
+    msg.includes('400') ||
+    msg.includes('leaked') ||
+    msg.includes('api_key_invalid') ||
+    msg.includes('permission_denied')
+  );
 }
 
 function extractJsonArray(rawText: string): unknown {
@@ -167,10 +180,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (!geminiKey) {
       return NextResponse.json(
-        {
-          error:
-            'Gemini API Key không hợp lệ. Vui lòng sử dụng mã từ Google AI Studio (bắt đầu bằng "AIza...").',
-        },
+        { error: 'Gemini API Key không hợp lệ hoặc bị bỏ trống.' },
         { status: 401 }
       );
     }
@@ -182,8 +192,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const genAI = new GoogleGenerativeAI(geminiKey);
     const userPrompt = `Analyze this IELTS Writing Task 2 text and return the JSON array:\n\n"""\n${essayText}\n"""`;
 
-    // Sử dụng đúng model gemini-3.8-flash theo yêu cầu của Google v1beta API
-    const primaryModel = genAI.getGenerativeModel({
+    // Sử dụng duy nhất model gemini-3.8-flash
+    const model = genAI.getGenerativeModel({
       model: 'gemini-3.8-flash',
       systemInstruction: ACADEMIC_GRADER_SYSTEM_PROMPT,
       generationConfig: {
@@ -195,13 +205,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     let rawResponseText = '';
 
     try {
-      const result = await primaryModel.generateContent(userPrompt);
+      const result = await model.generateContent(userPrompt);
       rawResponseText = result.response.text();
     } catch (primaryErr: unknown) {
-      // Retry 1 lần trên chính gemini-3.8-flash nếu gặp lỗi mạng/rate-limit tức thời,
-      // nếu vẫn lỗi thì ném đúng primaryErr gốc để không bị che khuất nguyên nhân.
+      if (isFatalAuthOrClientError(primaryErr)) {
+        throw primaryErr;
+      }
+
       try {
-        const retryResult = await primaryModel.generateContent(userPrompt);
+        const retryResult = await model.generateContent(userPrompt);
         rawResponseText = retryResult.response.text();
       } catch {
         throw primaryErr;
