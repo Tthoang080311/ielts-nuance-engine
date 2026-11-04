@@ -177,7 +177,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const userPrompt = `Naturalize this IELTS Speaking response and return the JSON array:\n\n"""\n${spokenText}\n"""`;
 
     const primaryModel = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.8-flash',
       systemInstruction: SPEAK_NATURALIZER_SYSTEM_PROMPT,
       generationConfig: {
         responseMimeType: 'application/json',
@@ -191,19 +191,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const result = await primaryModel.generateContent(userPrompt);
       rawResponseText = result.response.text();
     } catch (primaryErr: unknown) {
-      const fallbackModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: SPEAK_NATURALIZER_SYSTEM_PROMPT,
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.3,
-        },
-      });
       try {
-        const fallbackResult = await fallbackModel.generateContent(userPrompt);
-        rawResponseText = fallbackResult.response.text();
-      } catch (fallbackErr: unknown) {
-        throw fallbackErr instanceof Error ? fallbackErr : primaryErr;
+        const retryResult = await primaryModel.generateContent(userPrompt);
+        rawResponseText = retryResult.response.text();
+      } catch {
+        throw primaryErr;
       }
     }
 

@@ -115,7 +115,6 @@ function sanitizeAndAlignCritiques(
       ? (rawType as HighlightCategory)
       : 'Nominalization';
 
-    // Tìm kiếm từ vị trí con trỏ hiện tại trước để tránh trùng lặp khi một cụm từ xuất hiện nhiều lần
     let exactMatchIndex = sourceEssay.indexOf(originalSnippet, searchCursor);
     if (exactMatchIndex === -1) {
       exactMatchIndex = sourceEssay.indexOf(originalSnippet);
@@ -183,9 +182,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const genAI = new GoogleGenerativeAI(geminiKey);
     const userPrompt = `Analyze this IELTS Writing Task 2 text and return the JSON array:\n\n"""\n${essayText}\n"""`;
 
-    // Sử dụng trực tiếp gemini-2.5-flash làm Primary Model
+    // Sử dụng đúng model gemini-3.8-flash theo yêu cầu của Google v1beta API
     const primaryModel = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.8-flash',
       systemInstruction: ACADEMIC_GRADER_SYSTEM_PROMPT,
       generationConfig: {
         responseMimeType: 'application/json',
@@ -199,20 +198,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const result = await primaryModel.generateContent(userPrompt);
       rawResponseText = result.response.text();
     } catch (primaryErr: unknown) {
-      // Fallback sang gemini-2.0-flash nếu model chính bị quá tải (429/503)
-      const fallbackModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: ACADEMIC_GRADER_SYSTEM_PROMPT,
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-        },
-      });
+      // Retry 1 lần trên chính gemini-3.8-flash nếu gặp lỗi mạng/rate-limit tức thời,
+      // nếu vẫn lỗi thì ném đúng primaryErr gốc để không bị che khuất nguyên nhân.
       try {
-        const fallbackResult = await fallbackModel.generateContent(userPrompt);
-        rawResponseText = fallbackResult.response.text();
-      } catch (fallbackErr: unknown) {
-        throw fallbackErr instanceof Error ? fallbackErr : primaryErr;
+        const retryResult = await primaryModel.generateContent(userPrompt);
+        rawResponseText = retryResult.response.text();
+      } catch {
+        throw primaryErr;
       }
     }
 
